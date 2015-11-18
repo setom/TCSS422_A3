@@ -6,6 +6,19 @@
 
 typedef enum {newPCB, running, waiting, interrupted, halted} State;
 
+//compare function for qsort (Help from Stack Overflow: c-array-sorting-tips)
+int compare ( const void* a, const void* b) {
+	int int_a = * ((int*)a);
+	int int_b = * ((int*)b);
+	
+	if (int_a == int_b){
+		return 0;
+	} else if (int_a < int_b) {
+		return -1;
+	} else {
+		return 1;
+	}
+}
 
 //typedef PCBNode
 typedef struct PCBNode {
@@ -47,6 +60,18 @@ struct PCBNode* createPCBNode(int theId, int theQuanta) {
 		pcb->M4[k] = (rand() % theQuanta); 
 	}
 	pcb->next = NULL;
+	
+	//sort the arrays so that they are in ascending order
+	qsort(pcb->IO_Printer, 4, sizeof(int), compare);
+	qsort(pcb->IO_Keyboard, 4, sizeof(int), compare);
+	qsort(pcb->IO_Disk, 4, sizeof(int), compare);
+	qsort(pcb->IO_Modem, 4, sizeof(int), compare);
+	
+	qsort(pcb->M1, 4, sizeof(int), compare);
+	qsort(pcb->M2, 4, sizeof(int), compare);
+	qsort(pcb->M3, 4, sizeof(int), compare);
+	qsort(pcb->M4, 4, sizeof(int), compare);
+	
 	
 	return pcb;
 }
@@ -92,7 +117,7 @@ void enqueue (PCBNode* pcb, Queue* queue){
 }
 	
 //dequeue takes a queue and dequeues the head of the queue
-struct PCBNode dequeue (Queue* queue){
+struct PCBNode* dequeue (Queue* queue){
 	//get the head of the queue
 	PCBNode* head = queue->head;
 	
@@ -101,7 +126,7 @@ struct PCBNode dequeue (Queue* queue){
 	queue->size--;
 	
 	//return the head
-	return *head;
+	return head;
 	
 	//free the head *** IS THIS CODE REACHED? If not, where do i free it?
 	free(head);
@@ -122,9 +147,12 @@ struct Queue createQueue(){
 	queue.size = 0;
 	queue.head = NULL;
 	queue.tail = NULL;
-	queue.enqueue = &enqueue;
-	queue.dequeue = &dequeue;
-	queue.peek = &peek;
+	//queue.enqueue = &enqueue;
+	//queue.dequeue = &dequeue;
+	//queue.peek = &peek;
 	return queue;
 }
+
+
+
 
