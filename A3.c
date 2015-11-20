@@ -106,28 +106,24 @@ int main (int argc, char* argv[]){
 							currentProcess->state = waiting;
 							enqueue(currentProcess, &PrinterQueue);
 							i = 1;
-							break;
 						}
 						if((currentProcess->count % currentProcess->IO_Keyboard[k]) == 0){
 							printf("Process %d, interrupted by I/O Keyboard Request at Quantum %d\n", currentProcess->id, currentProcess->count);	
 							currentProcess->state = waiting;
 							enqueue(currentProcess, &KeyboardQueue);
 							i = 1;
-							break;
 						}
 						if((currentProcess->count % currentProcess->IO_Disk[k]) == 0){
 							printf("Process %d, interrupted by I/O Disk Request at Quantum %d\n", currentProcess->id, currentProcess->count);
 							currentProcess->state = waiting;
 							enqueue(currentProcess, &DiskQueue);
 							i = 1;
-							break;
 						}
 						if((currentProcess->count % currentProcess->IO_Modem[k]) == 0){
 							printf("Process %d, interrupted by I/O Modem Request at Quantum %d\n", currentProcess->id, currentProcess->count);
 							currentProcess->state = waiting;
 							enqueue(currentProcess, &ModemQueue);
 							i = 1;
-							break;
 						}
 					}
 					//if there was an interrupt, restart the loop
