@@ -46,18 +46,19 @@ struct PCBNode* createPCBNode(int theId, int theQuanta) {
 	pcb->quanta = theQuanta;
 	pcb->count = 0;
 	pcb->state = newPCB;
-	//fill the IO and Kernel Arrays with random numbers between 0 - quanta
+	//fill the IO and Kernel Arrays with random numbers between 10 - quanta
+	//Try to avoid super small numbers because they will fire too many interrupts for the simulation
 	int k;
 	for (k = 0; k < NODE_ARRAY_SIZE; k++){
-		pcb->IO_Printer[k] = (rand() % theQuanta); 
-		pcb->IO_Keyboard[k] = (rand() % theQuanta); 
-		pcb->IO_Disk[k] = (rand() % theQuanta); 
-		pcb->IO_Modem[k] = (rand() % theQuanta); 
+		pcb->IO_Printer[k] = (rand() % theQuanta) + 10; 
+		pcb->IO_Keyboard[k] = (rand() % theQuanta) + 10; 
+		pcb->IO_Disk[k] = (rand() % theQuanta) + 10; 
+		pcb->IO_Modem[k] = (rand() % theQuanta) + 10; 
 		
-		pcb->M1[k] = (rand() % theQuanta); 
-		pcb->M2[k] = (rand() % theQuanta); 
-		pcb->M3[k] = (rand() % theQuanta); 
-		pcb->M4[k] = (rand() % theQuanta); 
+		pcb->M1[k] = (rand() % theQuanta) + 10; 
+		pcb->M2[k] = (rand() % theQuanta) + 10; 
+		pcb->M3[k] = (rand() % theQuanta) + 10; 
+		pcb->M4[k] = (rand() % theQuanta) + 10; 
 	}
 	pcb->next = NULL;
 	
