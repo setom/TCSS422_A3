@@ -139,48 +139,48 @@ int main (int argc, char* argv[]){
 							break;
 						}
 					}
-					//if there was an interrupt, restart the loop
-					if(i == 1){
-						//continue;
+					//if there not an IO request, then check for Kernel requests
+					if(i == 0){
+						//- Check the current quanta against the randomly generated kernel values arrays
+						//	if quanta % array value == 0,
+						//		State = blocked
+						//		enqueue it in the proper kernel queue	
+						for(k = 0; k < NODE_ARRAY_SIZE; k++){
+							//use i as an interrupted flag
+							i = 0;
+							if((currentProcess->count % currentProcess->M1[k]) == 0){
+								printf("Process %d, interrupted by M1 Kernel Request at Quantum %d\n", currentProcess->id, currentProcess->count);
+								currentProcess->state = waiting;
+								enqueue(currentProcess, &M1Queue);
+								i = 1;
+								break;
+							}
+							if((currentProcess->count % currentProcess->M2[k]) == 0){
+								printf("Process %d, interrupted by M2 Kernel Request at Quantum %d\n", currentProcess->id, currentProcess->count);	
+								currentProcess->state = waiting;
+								enqueue(currentProcess, &M2Queue);
+								i = 1;
+								break;
+							}
+							if((currentProcess->count % currentProcess->M3[k]) == 0){
+								printf("Process %d, interrupted by M3 Kernel Request at Quantum %d\n", currentProcess->id, currentProcess->count);
+								currentProcess->state = waiting;
+								enqueue(currentProcess, &M3Queue);
+								i = 1;
+								break;
+							}
+							if((currentProcess->count % currentProcess->M4[k]) == 0){
+								printf("Process %d, interrupted by M4 Kernel Request at Quantum %d\n", currentProcess->id, currentProcess->count);
+								currentProcess->state = waiting;
+								enqueue(currentProcess, &M4Queue);
+								i = 1;
+								break;
+							}
+						}
 					}
 			
 			
-				//- Check the current quanta against the randomly generated kernel values arrays
-				//	if quanta % array value == 0,
-				//		State = blocked
-				//		enqueue it in the proper kernel queue	
-					for(k = 0; k < NODE_ARRAY_SIZE; k++){
-						//use i as an interrupted flag
-						i = 0;
-						if((currentProcess->count % currentProcess->M1[k]) == 0){
-							printf("Process %d, interrupted by M1 Kernel Request at Quantum %d\n", currentProcess->id, currentProcess->count);
-							currentProcess->state = waiting;
-							enqueue(currentProcess, &M1Queue);
-							i = 1;
-							break;
-						}
-						if((currentProcess->count % currentProcess->M2[k]) == 0){
-							printf("Process %d, interrupted by M2 Kernel Request at Quantum %d\n", currentProcess->id, currentProcess->count);	
-							currentProcess->state = waiting;
-							enqueue(currentProcess, &M2Queue);
-							i = 1;
-							break;
-						}
-						if((currentProcess->count % currentProcess->M3[k]) == 0){
-							printf("Process %d, interrupted by M3 Kernel Request at Quantum %d\n", currentProcess->id, currentProcess->count);
-							currentProcess->state = waiting;
-							enqueue(currentProcess, &M3Queue);
-							i = 1;
-							break;
-						}
-						if((currentProcess->count % currentProcess->M4[k]) == 0){
-							printf("Process %d, interrupted by M4 Kernel Request at Quantum %d\n", currentProcess->id, currentProcess->count);
-							currentProcess->state = waiting;
-							enqueue(currentProcess, &M4Queue);
-							i = 1;
-							break;
-						}
-					}
+				
 					//if it didn't get interrupted, put it back in the readyQueue
 					if(i == 0) {
 						currentProcess->state = waiting;
@@ -263,7 +263,7 @@ int main (int argc, char* argv[]){
 							break;		
 					}								
 			
-			scanf("%d", &s);
+			//scanf("%d", &s);
 	}	
 	
 
