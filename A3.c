@@ -45,8 +45,11 @@ int main (int argc, char* argv[]){
 	
 	//counter for processes
 	int Proc_ID = 0;
+	//number of processes running
+	int numProcesses = 0;
 	//counter for loops
 	int i, k;
+	int s = 0;
 	//int for random number generation
 	srand(time(0));
 	int r;
@@ -62,6 +65,7 @@ int main (int argc, char* argv[]){
 		PCBNode* pcb = createPCBNode(Proc_ID, r2);
 		enqueue(pcb, &ReadyQueue);
 		Proc_ID++;
+		numProcesses++;
 	}
 	
 //2 - Create 4 empty I/O device queues
@@ -77,19 +81,24 @@ int main (int argc, char* argv[]){
 	Queue M4Queue = createQueue();
 	
 //4 - Run the outer loop:
-	printf("readyQueue Size: %d\n", ReadyQueue.size);
-	while(ReadyQueue.size > 0){
+	while(numProcesses > 0){
 		
-		//run the first process in the Ready Queue
+		//if there is something in the ready queue, put it on the CPU,
+		// otherwise, there still might be stuff in the Kernel/OI queues
+		if(ReadyQueue.size > 0 ) {
+		
+			//run the first process in the Ready Queue
 			PCBNode* currentProcess = dequeue(&ReadyQueue);
 			currentProcess->state = running;
 			currentProcess->count++;
 			
 		//- if quantum == total quantums, process is terminated
 		//	break	
-			if (currentProcess->count >= currentProcess->quanta || currentProcess->state == halted){
+			if (currentProcess->count == currentProcess->quanta || currentProcess->state == halted){
 				currentProcess->state = halted;
 				printf("Process %d TERMINATED, Process completed %d quanta of %d total quanta\n", currentProcess->id, currentProcess->count, currentProcess->quanta);
+				//scanf("%d", &s);
+				numProcesses--;
 				//destroyPCBNode(currentProcess);
 				continue;
 			} else {
@@ -132,7 +141,7 @@ int main (int argc, char* argv[]){
 					}
 					//if there was an interrupt, restart the loop
 					if(i == 1){
-						continue;
+						//continue;
 					}
 			
 			
@@ -172,15 +181,22 @@ int main (int argc, char* argv[]){
 							break;
 						}
 					}
-					if(i == 1) {
-						continue;
+					//if it didn't get interrupted, put it back in the readyQueue
+					if(i == 0) {
+						currentProcess->state = waiting;
+						enqueue(currentProcess, &ReadyQueue);
 					}
 					
 					//put the node back in the ready queue
-					currentProcess->state = waiting;
-					enqueue(currentProcess, &ReadyQueue);
+					// currentProcess->state = waiting;
+// 					enqueue(currentProcess, &ReadyQueue);
+		
+		}
+
+			}
 					
-					
+			
+				printf("******Randomly Terminating IO and Kernel Queues\n");	
 				//- for each I/O Queue
 				//	randomly terminate the first process (is there a way to do this with timers instead? Needs 2 threads?
 				//	& put it back in the ready queue		
@@ -245,9 +261,9 @@ int main (int argc, char* argv[]){
 									break; 
 							}
 							break;		
-					}
-								
-			}
+					}								
+			
+			scanf("%d", &s);
 	}	
 	
 
