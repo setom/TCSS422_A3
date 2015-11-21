@@ -45,6 +45,8 @@ int main (int argc, char* argv[]){
 	
 	//counter for processes
 	int Proc_ID = 0;
+	//number of processes active
+	int numProcesses = 0;
 	//counter for loops
 	int i, k;
 	//int for random number generation
@@ -62,6 +64,7 @@ int main (int argc, char* argv[]){
 		PCBNode* pcb = createPCBNode(Proc_ID, r2);
 		enqueue(pcb, &ReadyQueue);
 		Proc_ID++;
+		numProcesses++;
 	}
 	
 //2 - Create 4 empty I/O device queues
@@ -78,7 +81,7 @@ int main (int argc, char* argv[]){
 	
 //4 - Run the outer loop:
 	printf("readyQueue Size: %d\n", ReadyQueue.size);
-	while(ReadyQueue.size > 0){
+	while(numProcesses > 0){
 		
 		//run the first process in the Ready Queue
 			PCBNode* currentProcess = dequeue(&ReadyQueue);
@@ -86,11 +89,12 @@ int main (int argc, char* argv[]){
 			currentProcess->count++;
 			
 		//- if quantum == total quantums, process is terminated
-		//	break	
-			if (currentProcess->count >= currentProcess->quanta || currentProcess->state == halted){
+		//	restart	
+			if (currentProcess->count == currentProcess->quanta){
 				currentProcess->state = halted;
 				printf("Process %d TERMINATED, Process completed %d quanta of %d total quanta\n", currentProcess->id, currentProcess->count, currentProcess->quanta);
-				//destroyPCBNode(currentProcess);
+				destroyPCBNode(currentProcess);
+				numProcesses--;
 				continue;
 			} else {
 			
@@ -177,8 +181,9 @@ int main (int argc, char* argv[]){
 					}
 					
 					//put the node back in the ready queue
-					currentProcess->state = waiting;
-					enqueue(currentProcess, &ReadyQueue);
+						currentProcess->state = waiting;
+						enqueue(currentProcess, &ReadyQueue);
+					
 					
 					
 				//- for each I/O Queue

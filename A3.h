@@ -50,28 +50,28 @@ struct PCBNode* createPCBNode(int theId, int theQuanta) {
 	//Try to avoid super small numbers because they will fire too many interrupts for the simulation
 	int k;
 	for (k = 0; k < NODE_ARRAY_SIZE; k++){
-		pcb->IO_Printer[k] = (rand() % theQuanta) + 10; 
-		pcb->IO_Keyboard[k] = (rand() % theQuanta) + 10; 
-		pcb->IO_Disk[k] = (rand() % theQuanta) + 10; 
-		pcb->IO_Modem[k] = (rand() % theQuanta) + 10; 
+		pcb->IO_Printer[k] = (rand() % theQuanta) + 1; 
+		pcb->IO_Keyboard[k] = (rand() % theQuanta) + 1; 
+		pcb->IO_Disk[k] = (rand() % theQuanta) + 1; 
+		pcb->IO_Modem[k] = (rand() % theQuanta) + 1; 
 		
-		pcb->M1[k] = (rand() % theQuanta) + 10; 
-		pcb->M2[k] = (rand() % theQuanta) + 10; 
-		pcb->M3[k] = (rand() % theQuanta) + 10; 
-		pcb->M4[k] = (rand() % theQuanta) + 10; 
+		pcb->M1[k] = (rand() % theQuanta) + 1; 
+		pcb->M2[k] = (rand() % theQuanta) + 1; 
+		pcb->M3[k] = (rand() % theQuanta) + 1; 
+		pcb->M4[k] = (rand() % theQuanta) + 1; 
 	}
 	pcb->next = NULL;
 	
-	//sort the arrays so that they are in ascending order
-	qsort(pcb->IO_Printer, 4, sizeof(int), compare);
-	qsort(pcb->IO_Keyboard, 4, sizeof(int), compare);
-	qsort(pcb->IO_Disk, 4, sizeof(int), compare);
-	qsort(pcb->IO_Modem, 4, sizeof(int), compare);
-	
-	qsort(pcb->M1, 4, sizeof(int), compare);
-	qsort(pcb->M2, 4, sizeof(int), compare);
-	qsort(pcb->M3, 4, sizeof(int), compare);
-	qsort(pcb->M4, 4, sizeof(int), compare);
+// 	sort the arrays so that they are in ascending order
+// 	qsort(pcb->IO_Printer, 4, sizeof(int), compare);
+// 	qsort(pcb->IO_Keyboard, 4, sizeof(int), compare);
+// 	qsort(pcb->IO_Disk, 4, sizeof(int), compare);
+// 	qsort(pcb->IO_Modem, 4, sizeof(int), compare);
+// 	
+// 	qsort(pcb->M1, 4, sizeof(int), compare);
+// 	qsort(pcb->M2, 4, sizeof(int), compare);
+// 	qsort(pcb->M3, 4, sizeof(int), compare);
+// 	qsort(pcb->M4, 4, sizeof(int), compare);
 	
 	
 	return pcb;
@@ -128,9 +128,6 @@ struct PCBNode* dequeue (Queue* queue){
 	
 	//return the head
 	return head;
-	
-	//free the head *** IS THIS CODE REACHED? If not, where do i free it?
-	free(head);
 }
 
 //peek peeks at the first item in a given queue
