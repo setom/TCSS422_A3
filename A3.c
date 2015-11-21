@@ -82,6 +82,8 @@ int main (int argc, char* argv[]){
     
     //4 - Run the outer loop:
     while(numProcesses > 0){
+    	
+    	printf("*NEW LOOP*\n");
         
         //if there is something in the ready queue, put it on the CPU,
         // otherwise, there still might be stuff in the Kernel/OI queues
@@ -91,6 +93,7 @@ int main (int argc, char* argv[]){
             PCBNode* currentProcess = dequeue(&ReadyQueue);
             currentProcess->state = running;
             currentProcess->count++;
+            printf("Current Process: %d\n", currentProcess->id);
             
             //- if quantum == total quantums, process is terminated
             //	break
@@ -196,7 +199,6 @@ int main (int argc, char* argv[]){
         }
         
         
-        printf("******Randomly Terminating IO and Kernel Queues\n");
         //- for each I/O Queue
         //	randomly terminate the first process (is there a way to do this with timers instead? Needs 2 threads?
         //	& put it back in the ready queue
@@ -263,7 +265,18 @@ int main (int argc, char* argv[]){
                 break;		
         }								
         
-        //scanf("%d", &s);
+        printf("Ready Queue Size: %d\n", ReadyQueue.size);
+		printf("Printer Queue Size: %d\n", PrinterQueue.size);
+		printf("Keyboard Queue Size: %d\n", KeyboardQueue.size);
+		printf("Disk Queue Size: %d\n", DiskQueue.size);
+		printf("ModemQueue Size: %d\n", ModemQueue.size);
+	
+		printf("M1Queue Size: %d\n", M1Queue.size);
+		printf("M2Queue Size: %d\n", M2Queue.size);
+		printf("M3Queue Size: %d\n", M3Queue.size);
+		printf("M4Queue Size: %d\n", M4Queue.size);
+		scanf("%d", &s);
+
     }	
     
     
