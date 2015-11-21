@@ -84,6 +84,7 @@ int main (int argc, char* argv[]){
     while(numProcesses > 0){
     	
     	printf("*NEW LOOP*\n");
+    	printf("Total Processes: %d\n", numProcesses);
         
         //if there is something in the ready queue, put it on the CPU,
         // otherwise, there still might be stuff in the Kernel/OI queues
@@ -93,11 +94,11 @@ int main (int argc, char* argv[]){
             PCBNode* currentProcess = dequeue(&ReadyQueue);
             currentProcess->state = running;
             currentProcess->count++;
-            printf("Current Process: %d\n", currentProcess->id);
+            
             
             //- if quantum == total quantums, process is terminated
             //	break
-            if (currentProcess->count == currentProcess->quanta || currentProcess->state == halted){
+            if (currentProcess->count >= currentProcess->quanta || currentProcess->state == halted){
                 currentProcess->state = halted;
                 printf("Process %d TERMINATED, Process completed %d quanta of %d total quanta\n", currentProcess->id, currentProcess->count, currentProcess->quanta);
                 //scanf("%d", &s);
@@ -275,7 +276,7 @@ int main (int argc, char* argv[]){
 		printf("M2Queue Size: %d\n", M2Queue.size);
 		printf("M3Queue Size: %d\n", M3Queue.size);
 		printf("M4Queue Size: %d\n", M4Queue.size);
-		scanf("%d", &s);
+		//scanf("%d", &s);
 
     }	
     
