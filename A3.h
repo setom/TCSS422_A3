@@ -63,15 +63,15 @@ struct PCBNode* createPCBNode(int theId, int theQuanta) {
 	pcb->next = NULL;
 	
 // 	sort the arrays so that they are in ascending order
-// 	qsort(pcb->IO_Printer, 4, sizeof(int), compare);
-// 	qsort(pcb->IO_Keyboard, 4, sizeof(int), compare);
-// 	qsort(pcb->IO_Disk, 4, sizeof(int), compare);
-// 	qsort(pcb->IO_Modem, 4, sizeof(int), compare);
-// 	
-// 	qsort(pcb->M1, 4, sizeof(int), compare);
-// 	qsort(pcb->M2, 4, sizeof(int), compare);
-// 	qsort(pcb->M3, 4, sizeof(int), compare);
-// 	qsort(pcb->M4, 4, sizeof(int), compare);
+	qsort(pcb->IO_Printer, 4, sizeof(int), compare);
+	qsort(pcb->IO_Keyboard, 4, sizeof(int), compare);
+	qsort(pcb->IO_Disk, 4, sizeof(int), compare);
+	qsort(pcb->IO_Modem, 4, sizeof(int), compare);
+	
+	qsort(pcb->M1, 4, sizeof(int), compare);
+	qsort(pcb->M2, 4, sizeof(int), compare);
+	qsort(pcb->M3, 4, sizeof(int), compare);
+	qsort(pcb->M4, 4, sizeof(int), compare);
 	
 	
 	return pcb;
@@ -119,6 +119,7 @@ void enqueue (PCBNode* pcb, Queue* queue){
 	
 //dequeue takes a queue and dequeues the head of the queue
 struct PCBNode* dequeue (Queue* queue){
+	
 	//get the head of the queue
 	PCBNode* head = queue->head;
 	
@@ -130,14 +131,6 @@ struct PCBNode* dequeue (Queue* queue){
 	return head;
 }
 
-//peek peeks at the first item in a given queue
-struct PCBNode peek (Queue* queue) {
-	
-	//get the head and return it
-	PCBNode* head = queue->head;
-	return *head;
-
-}
 
 //create a queue
 struct Queue createQueue(){
@@ -152,5 +145,66 @@ struct Queue createQueue(){
 }
 
 
+//Dequeue the first item in the Ready Queue and run it
+//increment the count
+//compare the total quanta
+struct PCBNode* dequeueAndCheckTermination(Queue *queue){
+	PCBNode* node = dequeue(queue);
+	if (node != NULL){
+		//node = dequeue(queue);
+		node->state = running;
+		node->count++;
+		printf("Node Count: %d of %d\n", node->count, node->quanta);
+		if(node->count == node->quanta){
+			node->state = halted;
+            printf("Process %d TERMINATED, Process completed %d quanta of %d total quanta\n", node->id, node->count, node->quanta);
+			destroyPCBNode(node);
+			//return NULL;
+		}
+	} 
+	printf("Last line\n");
+	return node;
+}
 
-
+//compare the current quanta of a process with the interrupt values of a PCB array
+//return 0 if no interrupt, else return int value of interrupting process 
+// 1 - printer, 2 - keyboard, 3 - disk 4 - modem 
+// 5 - M1 6 - M2 7 - M3 8 - M4
+int compareIOInterrupt(PCBNode* node){
+	int i;
+	for(i=0; i < 4; i++){
+		if (node->count % node->IO_Printer[i] == 0){
+			printf("Process %d interrupted by IO_Printer at quantum %d\n", node->id, node->count);
+			return 1;
+		}
+		if (node->count % node->IO_Keyboard[i] == 0){
+			printf("Process %d interrupted by IO_Keyboard at quantum %d\n", node->id, node->count);
+			return 2;
+		}
+		if (node->count % node->IO_Disk[i] == 0){
+			printf("Process %d interrupted by IO_Disk at quantum %d\n", node->id, node->count);
+			return 3;
+		}
+		if (node->count % node->IO_Modem[i] == 0){
+			printf("Process %d interrupted by IO_Modem at quantum %d\n", node->id, node->count);
+			return 4;
+		}
+		if (node->count % node->M1[i] == 0){
+			printf("Process %d interrupted by Kernel Request M1 at quantum %d\n", node->id, node->count);
+			return 5;
+		}
+		if (node->count % node->M2[i] == 0){
+			printf("Process %d interrupted by Kernel Request M2 at quantum %d\n", node->id, node->count);
+			return 6;
+		}
+		if (node->count % node->M3[i] == 0){
+			printf("Process %d interrupted by Kernel Request M3 at quantum %d\n", node->id, node->count);
+			return 7;
+		}
+		if (node->count % node->M4[i] == 0){
+			printf("Process %d interrupted by Kernel Request M4 at quantum %d\n", node->id, node->count);
+			return 8;
+		}
+	}
+	return 0;
+}

@@ -45,8 +45,6 @@ int main (int argc, char* argv[]){
     
     //counter for processes
     int Proc_ID = 0;
-    //number of processes running
-    int numProcesses = 0;
     //counter for loops
     int i, k;
     int s = 0;
@@ -65,7 +63,6 @@ int main (int argc, char* argv[]){
         PCBNode* pcb = createPCBNode(Proc_ID, r2);
         enqueue(pcb, &ReadyQueue);
         Proc_ID++;
-        numProcesses++;
     }
     
     //2 - Create 4 empty I/O device queues
@@ -81,204 +78,128 @@ int main (int argc, char* argv[]){
     Queue M4Queue = createQueue();
     
     //4 - Run the outer loop:
-    while(numProcesses > 0){
+    while(ReadyQueue.size > 0 || PrinterQueue.size > 0 || KeyboardQueue.size > 0 || DiskQueue.size > 0 || ModemQueue.size > 0 || M1Queue.size > 0 || M2Queue.size > 0 || M3Queue.size > 0 || M4Queue.size > 0){
     	
-    	printf("*NEW LOOP*\n");
-    	printf("Total Processes: %d\n", numProcesses);
-        
-        //if there is something in the ready queue, put it on the CPU,
-        // otherwise, there still might be stuff in the Kernel/OI queues
-        if(ReadyQueue.size > 0 ) {
-            
-            //run the first process in the Ready Queue
-            PCBNode* currentProcess = dequeue(&ReadyQueue);
-            currentProcess->state = running;
-            currentProcess->count++;
-            
-            
-            //- if quantum == total quantums, process is terminated
-            //	break
-            if (currentProcess->count >= currentProcess->quanta || currentProcess->state == halted){
-                currentProcess->state = halted;
-                printf("Process %d TERMINATED, Process completed %d quanta of %d total quanta\n", currentProcess->id, currentProcess->count, currentProcess->quanta);
-                //scanf("%d", &s);
-                numProcesses--;
-                //destroyPCBNode(currentProcess);
-                continue;
-            } else {
-                
-                // - Check the current quanta against the randomly generated i/o values arrays
-                //	if quanta % array value == 0,
-                //		State = blocked
-                //		Enqueue Process pointer to I/O queue of the device that is blocked
-                for(k = 0; k < NODE_ARRAY_SIZE; k++){
-                    //use i as an interrupted flag
-                    i = 0;
-                    if((currentProcess->count % currentProcess->IO_Printer[k]) == 0){
-                        printf("Process %d, interrupted by I/O Printer Request at Quantum %d\n", currentProcess->id, currentProcess->count);
-                        currentProcess->state = waiting;
-                        enqueue(currentProcess, &PrinterQueue);
-                        i = 1;
-                        break;
-                    }
-                    if((currentProcess->count % currentProcess->IO_Keyboard[k]) == 0){
-                        printf("Process %d, interrupted by I/O Keyboard Request at Quantum %d\n", currentProcess->id, currentProcess->count);
-                        currentProcess->state = waiting;
-                        enqueue(currentProcess, &KeyboardQueue);
-                        i = 1;
-                        break;
-                    }
-                    if((currentProcess->count % currentProcess->IO_Disk[k]) == 0){
-                        printf("Process %d, interrupted by I/O Disk Request at Quantum %d\n", currentProcess->id, currentProcess->count);
-                        currentProcess->state = waiting;
-                        enqueue(currentProcess, &DiskQueue);
-                        i = 1;
-                        break;
-                    }
-                    if((currentProcess->count % currentProcess->IO_Modem[k]) == 0){
-                        printf("Process %d, interrupted by I/O Modem Request at Quantum %d\n", currentProcess->id, currentProcess->count);
-                        currentProcess->state = waiting;
-                        enqueue(currentProcess, &ModemQueue);
-                        i = 1;
-                        break;
-                    }
-                }
-                //if there not an IO request, then check for Kernel requests
-                if(i == 0){
-                    //- Check the current quanta against the randomly generated kernel values arrays
-                    //	if quanta % array value == 0,
-                    //		State = blocked
-                    //		enqueue it in the proper kernel queue
-                    for(k = 0; k < NODE_ARRAY_SIZE; k++){
-                        //use i as an interrupted flag
-                        i = 0;
-                        if((currentProcess->count % currentProcess->M1[k]) == 0){
-                            printf("Process %d, interrupted by M1 Kernel Request at Quantum %d\n", currentProcess->id, currentProcess->count);
-                            currentProcess->state = waiting;
-                            enqueue(currentProcess, &M1Queue);
-                            i = 1;
-                            break;
-                        }
-                        if((currentProcess->count % currentProcess->M2[k]) == 0){
-                            printf("Process %d, interrupted by M2 Kernel Request at Quantum %d\n", currentProcess->id, currentProcess->count);
-                            currentProcess->state = waiting;
-                            enqueue(currentProcess, &M2Queue);
-                            i = 1;
-                            break;
-                        }
-                        if((currentProcess->count % currentProcess->M3[k]) == 0){
-                            printf("Process %d, interrupted by M3 Kernel Request at Quantum %d\n", currentProcess->id, currentProcess->count);
-                            currentProcess->state = waiting;
-                            enqueue(currentProcess, &M3Queue);
-                            i = 1;
-                            break;
-                        }
-                        if((currentProcess->count % currentProcess->M4[k]) == 0){
-                            printf("Process %d, interrupted by M4 Kernel Request at Quantum %d\n", currentProcess->id, currentProcess->count);
-                            currentProcess->state = waiting;
-                            enqueue(currentProcess, &M4Queue);
-                            i = 1;
-                            break;
-                        }
-                    }
-                }
-                
-                
-                
-                //if it didn't get interrupted, put it back in the readyQueue
-                if(i == 0) {
-                    currentProcess->state = waiting;
-                    enqueue(currentProcess, &ReadyQueue);
-                }
-                
-                //put the node back in the ready queue
-                // currentProcess->state = waiting;
-                // 					enqueue(currentProcess, &ReadyQueue);
-                
-            }
-            
-        }
-        
-        
-        //- for each I/O Queue
-        //	randomly terminate the first process (is there a way to do this with timers instead? Needs 2 threads?
-        //	& put it back in the ready queue
-        
-        //select which queue we are going to randomly work on
-        r = rand() % 4;
-        //determine if it terminates or not (0 = no, 1 = yes)
-        //move back to ready queue as required
-        r2 = rand() % 2;
-        switch (r2) {
-            case 0 :
-                break;
-            case 1 :
-                switch(r) {
-                    case 0 :
-                        if (PrinterQueue.size > 0){
-                            PCBNode* ioProcess = dequeue(&PrinterQueue);
-                            printf("Process %d I/O request completed, returning to Ready Queue\n", ioProcess->id);
-                            enqueue(ioProcess, &ReadyQueue);
-                        }
-                        if (M1Queue.size > 0){
-                            PCBNode* mProcess = dequeue(&M1Queue);
-                            printf("Process %d M1 Kernel request completed, returning to Ready Queue\n", mProcess->id);
-                            enqueue(mProcess, &ReadyQueue);
-                        }
-                        break;
-                    case 1 : 
-                        if (KeyboardQueue.size > 0){
-                            PCBNode* ioProcess = dequeue(&KeyboardQueue);
-                            printf("Process %d I/O request completed, returning to Ready Queue\n", ioProcess->id);
-                            enqueue(ioProcess, &ReadyQueue);
-                        }
-                        if (M2Queue.size > 0){
-                            PCBNode* mProcess = dequeue(&M2Queue);
-                            printf("Process %d M2 Kernel request completed, returning to Ready Queue\n", mProcess->id);
-                            enqueue(mProcess, &ReadyQueue);
-                        }
-                        break;
-                    case 2 : 
-                        if (DiskQueue.size > 0){
-                            PCBNode* ioProcess = dequeue(&DiskQueue);
-                            printf("Process %d I/O request completed, returning to Ready Queue\n", ioProcess->id);
-                            enqueue(ioProcess, &ReadyQueue);
-                        }
-                        if (M3Queue.size > 0){
-                            PCBNode* mProcess = dequeue(&M3Queue);
-                            printf("Process %d M3 Kernel request completed, returning to Ready Queue\n", mProcess->id);
-                            enqueue(mProcess, &ReadyQueue);
-                        }
-                        break;
-                    case 3 : 
-                        if (ModemQueue.size > 0){
-                            PCBNode* ioProcess = dequeue(&ModemQueue);
-                            printf("Process %d I/O request completed, returning to Ready Queue\n", ioProcess->id);
-                            enqueue(ioProcess, &ReadyQueue);
-                        }
-                        if (M4Queue.size > 0){
-                            PCBNode* mProcess = dequeue(&M4Queue);
-                            printf("Process %d M4 Kernel request completed, returning to Ready Queue\n", mProcess->id);
-                            enqueue(mProcess, &ReadyQueue);
-                        }
-                        break; 
-                }
-                break;		
-        }								
-        
-        printf("Ready Queue Size: %d\n", ReadyQueue.size);
-		printf("Printer Queue Size: %d\n", PrinterQueue.size);
-		printf("Keyboard Queue Size: %d\n", KeyboardQueue.size);
-		printf("Disk Queue Size: %d\n", DiskQueue.size);
-		printf("ModemQueue Size: %d\n", ModemQueue.size);
-	
-		printf("M1Queue Size: %d\n", M1Queue.size);
-		printf("M2Queue Size: %d\n", M2Queue.size);
-		printf("M3Queue Size: %d\n", M3Queue.size);
-		printf("M4Queue Size: %d\n", M4Queue.size);
-		//scanf("%d", &s);
+    	printf("*** NEW LOOP ***\n");	
+    	//printf("ReadyQueueSize = %d\n", ReadyQueue.size);
+    	if(ReadyQueue.size > 0) {
+			//dequeue the first node in the ready queue check if it reached quantum goal
+			PCBNode* currentProcess = dequeueAndCheckTermination(&ReadyQueue);
+			printf("Dequeuing node %d from ReadyQueue\n", currentProcess->id);	
+		
+			//if the currentProcess is not null, check for IO and Kernel discontinuties
+			if(currentProcess != NULL){
+				i = compareIOInterrupt(currentProcess);
+				switch(i) {
+					case 1:
+						currentProcess->state = waiting;
+						enqueue(currentProcess, &PrinterQueue);
+						break;
+					case 2: 
+						currentProcess->state = waiting;
+						enqueue(currentProcess, &KeyboardQueue);
+						break;
+					case 3: 
+						currentProcess->state = waiting;
+						enqueue(currentProcess, &DiskQueue);
+						break;
+					case 4: 
+						currentProcess->state = waiting;
+						enqueue(currentProcess, &ModemQueue);
+						break;
+					case 5: 
+						currentProcess->state = waiting;
+						enqueue(currentProcess, &M1Queue);
+						break;
+					case 6: 
+						currentProcess->state = waiting;
+						enqueue(currentProcess, &M2Queue);
+						break;
+					case 7: 
+						currentProcess->state = waiting;
+						enqueue(currentProcess, &M3Queue);
+						break;
+					case 8: 
+						currentProcess->state = waiting;
+						enqueue(currentProcess, &M4Queue);
+						break;	
+					default: 
+						break;  		
+				}
+			
+				//if the process is still running, it must not have been interrupted
+				//simulate the timer putting it back in the ready queue
+				if (currentProcess->state == running){
+					currentProcess->state = waiting;
+					enqueue(currentProcess, &ReadyQueue);
+				}
+			}
+    	} else {
+    		printf("ReadyQueue is Empty! randomly dequeuing IO/Kernel Queues\n");
+    	}
+    	
+    	// randomly complete IO requests (25% chance of clearing IO Queues)
+    	r = rand() % 4;
+    	if (r == 0){
+			if(PrinterQueue.size>0){
+				PCBNode* curNode = dequeue(&PrinterQueue);
+				enqueue(curNode, &ReadyQueue);
+				printf("Process %d IO Printer request completed, returning to ReadyQueue\n", curNode->id);
+			}
+			if(KeyboardQueue.size>0){
+				PCBNode* curNode = dequeue(&KeyboardQueue);
+				enqueue(curNode, &ReadyQueue);
+				printf("Process %d IO Keyboard request completed, returning to ReadyQueue\n", curNode->id);
+			}
+			if(DiskQueue.size>0){
+				PCBNode* curNode = dequeue(&DiskQueue);
+				enqueue(curNode, &ReadyQueue);
+				printf("Process %d IO Disk request completed, returning to ReadyQueue\n", curNode->id);
+			}
+			if(ModemQueue.size>0){
+				PCBNode* curNode = dequeue(&ModemQueue);
+				enqueue(curNode, &ReadyQueue);
+				printf("Process %d IO Modem request completed, returning to ReadyQueue\n", curNode->id);
+			}
+		}
+		
+		r = rand() % 4;
+    	if (r == 0){
+			if(M1Queue.size>0){
+				PCBNode* curNode = dequeue(&M1Queue);
+				enqueue(curNode, &ReadyQueue);
+				printf("Process %d M1 request completed, returning to ReadyQueue\n", curNode->id);
+			}
+			if(M2Queue.size>0){
+				PCBNode* curNode = dequeue(&M2Queue);
+				enqueue(curNode, &ReadyQueue);
+				printf("Process %d M2request completed, returning to ReadyQueue\n", curNode->id);
+			}
+			if(M3Queue.size>0){
+				PCBNode* curNode = dequeue(&M3Queue);
+				enqueue(curNode, &ReadyQueue);
+				printf("Process %d M3 request completed, returning to ReadyQueue\n", curNode->id);
+			}
+			if(M4Queue.size>0){
+				PCBNode* curNode = dequeue(&M4Queue);
+				enqueue(curNode, &ReadyQueue);
+				printf("Process %d M4 request completed, returning to ReadyQueue\n", curNode->id);
+			}
+		}
+		
+// 		printf("Ready Queue Size: %d\n", ReadyQueue.size);
+// 		printf("Printer Queue Size: %d\n", PrinterQueue.size);
+// 		printf("Keyboard Queue Size: %d\n", KeyboardQueue.size);
+// 		printf("Disk Queue Size: %d\n", DiskQueue.size);
+// 		printf("ModemQueue Size: %d\n", ModemQueue.size);
+// 	
+// 		printf("M1Queue Size: %d\n", M1Queue.size);
+// 		printf("M2Queue Size: %d\n", M2Queue.size);
+// 		printf("M3Queue Size: %d\n", M3Queue.size);
+// 		printf("M4Queue Size: %d\n", M4Queue.size);
+// 		scanf("%d", &s);
 
-    }	
-    
+
+    }
     
 }
