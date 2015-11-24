@@ -80,15 +80,17 @@ int main (int argc, char* argv[]){
     //4 - Run the outer loop:
     while(ReadyQueue.size > 0 || PrinterQueue.size > 0 || KeyboardQueue.size > 0 || DiskQueue.size > 0 || ModemQueue.size > 0 || M1Queue.size > 0 || M2Queue.size > 0 || M3Queue.size > 0 || M4Queue.size > 0){
     	
-    	printf("*** NEW LOOP ***\n");	
+    	printf(" NEW LOOP \n");	
     	//printf("ReadyQueueSize = %d\n", ReadyQueue.size);
     	if(ReadyQueue.size > 0) {
 			//dequeue the first node in the ready queue check if it reached quantum goal
 			PCBNode* currentProcess = dequeueAndCheckTermination(&ReadyQueue);
-			printf("Dequeuing node %d from ReadyQueue\n", currentProcess->id);	
+			//printf("Dequeuing node %d from ReadyQueue\n", currentProcess->id);	
+			
 		
 			//if the currentProcess is not null, check for IO and Kernel discontinuties
 			if(currentProcess != NULL){
+				if(currentProcess->count < currentProcess->quanta){
 				i = compareIOInterrupt(currentProcess);
 				switch(i) {
 					case 1:
@@ -126,12 +128,17 @@ int main (int argc, char* argv[]){
 					default: 
 						break;  		
 				}
+				
 			
 				//if the process is still running, it must not have been interrupted
 				//simulate the timer putting it back in the ready queue
 				if (currentProcess->state == running){
 					currentProcess->state = waiting;
 					enqueue(currentProcess, &ReadyQueue);
+				}
+				}
+				if(currentProcess == NULL){
+					destroyPCBNode(currentProcess);
 				}
 			}
     	} else {

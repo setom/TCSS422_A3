@@ -79,6 +79,7 @@ struct PCBNode* createPCBNode(int theId, int theQuanta) {
 
 //destroy a PCBNode
 void destroyPCBNode(struct PCBNode* pcbNode){
+	printf("Destroying PCB %d\n", pcbNode->id);
 	free(pcbNode);
 }
 
@@ -120,6 +121,9 @@ void enqueue (PCBNode* pcb, Queue* queue){
 //dequeue takes a queue and dequeues the head of the queue
 struct PCBNode* dequeue (Queue* queue){
 	
+	if(queue->size == 0){
+		return NULL;
+	}
 	//get the head of the queue
 	PCBNode* head = queue->head;
 	
@@ -150,7 +154,7 @@ struct Queue createQueue(){
 //compare the total quanta
 struct PCBNode* dequeueAndCheckTermination(Queue *queue){
 	PCBNode* node = dequeue(queue);
-	if (node != NULL){
+	if (node != 0){
 		//node = dequeue(queue);
 		node->state = running;
 		node->count++;
@@ -159,10 +163,9 @@ struct PCBNode* dequeueAndCheckTermination(Queue *queue){
 			node->state = halted;
             printf("Process %d TERMINATED, Process completed %d quanta of %d total quanta\n", node->id, node->count, node->quanta);
 			destroyPCBNode(node);
-			//return NULL;
+			return (PCBNode*)0;
 		}
 	} 
-	printf("Last line\n");
 	return node;
 }
 
