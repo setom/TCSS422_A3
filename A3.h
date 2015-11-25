@@ -142,9 +142,6 @@ struct Queue createQueue(){
     queue.size = 0;
     queue.head = NULL;
     queue.tail = NULL;
-    //queue.enqueue = &enqueue;
-    //queue.dequeue = &dequeue;
-    //queue.peek = &peek;
     return queue;
 }
 
@@ -158,7 +155,7 @@ struct PCBNode* dequeueAndCheckTermination(Queue *queue){
         //node = dequeue(queue);
         node->state = running;
         node->count++;
-        printf("Node Count: %d of %d\n", node->count, node->quanta);
+        printf("Node %d Count: %d of %d\n", node->id, node->count, node->quanta);
         if(node->count == node->quanta){
             node->state = halted;
             printf("Process %d TERMINATED, Process completed %d quanta of %d total quanta\n", node->id, node->count, node->quanta);
@@ -169,45 +166,24 @@ struct PCBNode* dequeueAndCheckTermination(Queue *queue){
     return node;
 }
 
-//compare the current quanta of a process with the interrupt values of a PCB array
-//return 0 if no interrupt, else return int value of interrupting process
-// 1 - printer, 2 - keyboard, 3 - disk 4 - modem
-// 5 - M1 6 - M2 7 - M3 8 - M4
-int compareIOInterrupt(PCBNode* node){
-    int i;
-    for(i=0; i < 4; i++){
-        if (node->count % node->IO_Printer[i] == 0){
-            printf("Process %d interrupted by IO_Printer at quantum %d\n", node->id, node->count);
-            return 1;
-        }
-        if (node->count % node->IO_Keyboard[i] == 0){
-            printf("Process %d interrupted by IO_Keyboard at quantum %d\n", node->id, node->count);
-            return 2;
-        }
-        if (node->count % node->IO_Disk[i] == 0){
-            printf("Process %d interrupted by IO_Disk at quantum %d\n", node->id, node->count);
-            return 3;
-        }
-        if (node->count % node->IO_Modem[i] == 0){
-            printf("Process %d interrupted by IO_Modem at quantum %d\n", node->id, node->count);
-            return 4;
-        }
-        if (node->count % node->M1[i] == 0){
-            printf("Process %d interrupted by Kernel Request M1 at quantum %d\n", node->id, node->count);
-            return 5;
-        }
-        if (node->count % node->M2[i] == 0){
-            printf("Process %d interrupted by Kernel Request M2 at quantum %d\n", node->id, node->count);
-            return 6;
-        }
-        if (node->count % node->M3[i] == 0){
-            printf("Process %d interrupted by Kernel Request M3 at quantum %d\n", node->id, node->count);
-            return 7;
-        }
-        if (node->count % node->M4[i] == 0){
-            printf("Process %d interrupted by Kernel Request M4 at quantum %d\n", node->id, node->count);
-            return 8;
-        }
-    }
-    return 0;
+//returns 1 if there is an interrupt in the node
+int checkIOInterrupt(PCBNode* node, int array[4]){
+	int i;
+	for(i=0; i < 4; i++){
+		if(node->count == array[i]){
+			//printf("Node %d interrupted by IO request at quanta %d\n", node->id, node->count);
+			return 1;
+		}
+	}
+	return 0;
+}
+
+//randomly dequeue something
+void randomlyDequeue(Queue* intQ, Queue* readyQ){
+	int r = rand() % 2;
+	if (r == 0) {
+		if (intQ->size > 0){
+			enqueue((dequeue(intQ)), readyQ);
+		}
+	}
 }
