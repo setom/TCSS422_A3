@@ -78,14 +78,15 @@ int main (int argc, char* argv[]){
     Queue M4Queue = createQueue();
     
     //4 - Run the outer loop:
-    while(ReadyQueue.size > 0 || PrinterQueue.size > 0 || KeyboardQueue.size > 0 || DiskQueue.size > 0 || ModemQueue.size > 0 || M1Queue.size > 0 || M2Queue.size > 0 || M3Queue.size > 0 || M4Queue.size > 0){
+    while(ReadyQueue.size > 0 || PrinterQueue.size > 0){
 
+		scanf("%d", &i);
 		//if something in the readyQueue, dequeue it, check for interrupts and requeue it as appropriate
         if(ReadyQueue.size > 0) {
 			//dequeue the first node in the ready queue check if it reached quantum goal
             PCBNode* currentProcess = dequeueAndCheckTermination(&ReadyQueue);
             //printf("Dequeuing node %d from ReadyQueue\n", currentProcess->id);
-
+			
 			if(currentProcess != NULL){
 				int interruptSentinel = 0;
 				i = 0;
@@ -118,15 +119,16 @@ int main (int argc, char* argv[]){
 			
 		printf("Ready Queue Size: %d\n", ReadyQueue.size);
 		printf("Printer Queue Size: %d\n", PrinterQueue.size);
-		printf("Keyboard Queue Size: %d\n", KeyboardQueue.size);
-		printf("Disk Queue Size: %d\n", DiskQueue.size);
-		printf("ModemQueue Size: %d\n", ModemQueue.size);
-	
-		printf("M1Queue Size: %d\n", M1Queue.size);
-		printf("M2Queue Size: %d\n", M2Queue.size);
-		printf("M3Queue Size: %d\n", M3Queue.size);
-		printf("M4Queue Size: %d\n\n", M4Queue.size);
+// 		printf("Keyboard Queue Size: %d\n", KeyboardQueue.size);
+// 		printf("Disk Queue Size: %d\n", DiskQueue.size);
+// 		printf("ModemQueue Size: %d\n", ModemQueue.size);
+// 	
+// 		printf("M1Queue Size: %d\n", M1Queue.size);
+// 		printf("M2Queue Size: %d\n", M2Queue.size);
+// 		printf("M3Queue Size: %d\n", M3Queue.size);
+// 		printf("M4Queue Size: %d\n\n", M4Queue.size);
 		//scanf("%d", &s);
+		printf("\n");
     }
 
 }

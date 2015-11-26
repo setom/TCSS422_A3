@@ -150,20 +150,23 @@ struct Queue createQueue(){
 //increment the count
 //compare the total quanta
 struct PCBNode* dequeueAndCheckTermination(Queue *queue){
-    PCBNode* node = dequeue(queue);
-    if (node != 0){
-        //node = dequeue(queue);
+    if (queue->size > 0){
+        PCBNode* node = dequeue(queue);
         node->state = running;
         node->count++;
         printf("Node %d Count: %d of %d\n", node->id, node->count, node->quanta);
-        if(node->count == node->quanta){
+        if(node->count >= node->quanta){
             node->state = halted;
             printf("Process %d TERMINATED, Process completed %d quanta of %d total quanta\n", node->id, node->count, node->quanta);
             destroyPCBNode(node);
             return (PCBNode*)0;
         }
+        if(node->id == 0){
+        	return(PCBNode*)0;
+        }
+        return node;
     }
-    return node;
+    return (PCBNode*)0;
 }
 
 //returns 1 if there is an interrupt in the node
