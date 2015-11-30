@@ -59,7 +59,9 @@ int main (int argc, char* argv[]){
     r = ((rand() % 10) + 25);
     for (i = 0; i < r; i ++){
         //random number of quanta that the process will consume
-        r2 = ((rand() % 10) + 25);
+        r2 = ((rand() % 100) + 2500);
+        printf("** R2: %d\n", r2);
+        //scanf("%d", &k);
         PCBNode* pcb = createPCBNode(Proc_ID, r2);
         enqueue(pcb, &ReadyQueue);
         Proc_ID++;
@@ -78,9 +80,8 @@ int main (int argc, char* argv[]){
     Queue M4Queue = createQueue();
     
     //4 - Run the outer loop:
-    while(ReadyQueue.size > 0 || PrinterQueue.size > 0){
+    while(ReadyQueue.size > 0 || PrinterQueue.size > 0 || KeyboardQueue.size > 0 || DiskQueue.size > 0 || ModemQueue.size > 0){
 
-		scanf("%d", &i);
 		//if something in the readyQueue, dequeue it, check for interrupts and requeue it as appropriate
         if(ReadyQueue.size > 0) {
 			//dequeue the first node in the ready queue check if it reached quantum goal
@@ -88,15 +89,37 @@ int main (int argc, char* argv[]){
             //printf("Dequeuing node %d from ReadyQueue\n", currentProcess->id);
 			
 			if(currentProcess != NULL){
+				printf("Current CPU Process: %d, count: %d of %d\n", currentProcess->id, currentProcess->count, currentProcess->quanta);
 				int interruptSentinel = 0;
 				i = 0;
-				
+
 				while(1){
 					//check for interrupts on the node
 					if(checkIOInterrupt(currentProcess, currentProcess->IO_Printer)){
 						printf("Node %d interrupted by IO_Printer at quanta %d, requeueing...\n", currentProcess->id, currentProcess->count);
 						currentProcess->state = waiting;
 						enqueue(currentProcess, &PrinterQueue);
+						interruptSentinel = 1;
+						break;
+					}
+					if(checkIOInterrupt(currentProcess, currentProcess->IO_Keyboard)){
+						printf("Node %d interrupted by IO_Keyboard at quanta %d, requeueing...\n", currentProcess->id, currentProcess->count);
+						currentProcess->state = waiting;
+						enqueue(currentProcess, &KeyboardQueue);
+						interruptSentinel = 1;
+						break;
+					}
+					if(checkIOInterrupt(currentProcess, currentProcess->IO_Disk)){
+						printf("Node %d interrupted by IO_Disk at quanta %d, requeueing...\n", currentProcess->id, currentProcess->count);
+						currentProcess->state = waiting;
+						enqueue(currentProcess, &DiskQueue);
+						interruptSentinel = 1;
+						break;
+					}
+					if(checkIOInterrupt(currentProcess, currentProcess->IO_Modem)){
+						printf("Node %d interrupted by IO_Modem at quanta %d, requeueing...\n", currentProcess->id, currentProcess->count);
+						currentProcess->state = waiting;
+						enqueue(currentProcess, &ModemQueue);
 						interruptSentinel = 1;
 						break;
 					}
@@ -108,20 +131,35 @@ int main (int argc, char* argv[]){
 					currentProcess->state = waiting;
 					enqueue(currentProcess, &ReadyQueue);
 				}
+			} else {
+				free(currentProcess);
 			}
 				
 		}
 		
+		//randomly dequeue the IO request queues
 		if(PrinterQueue.size > 0){
 			//randomly dequeue the IO Queues
 			randomlyDequeue(&PrinterQueue, &ReadyQueue);
 		}
+		if(KeyboardQueue.size > 0){
+			//randomly dequeue the IO Queues
+			randomlyDequeue(&KeyboardQueue, &ReadyQueue);
+		}
+		if(DiskQueue.size > 0){
+			//randomly dequeue the IO Queues
+			randomlyDequeue(&DiskQueue, &ReadyQueue);
+		}
+		if(ModemQueue.size > 0){
+			//randomly dequeue the IO Queues
+			randomlyDequeue(&ModemQueue, &ReadyQueue);
+		}
 			
 		printf("Ready Queue Size: %d\n", ReadyQueue.size);
 		printf("Printer Queue Size: %d\n", PrinterQueue.size);
-// 		printf("Keyboard Queue Size: %d\n", KeyboardQueue.size);
-// 		printf("Disk Queue Size: %d\n", DiskQueue.size);
-// 		printf("ModemQueue Size: %d\n", ModemQueue.size);
+		printf("Keyboard Queue Size: %d\n", KeyboardQueue.size);
+		printf("Disk Queue Size: %d\n", DiskQueue.size);
+		printf("ModemQueue Size: %d\n", ModemQueue.size);
 // 	
 // 		printf("M1Queue Size: %d\n", M1Queue.size);
 // 		printf("M2Queue Size: %d\n", M2Queue.size);

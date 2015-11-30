@@ -87,12 +87,7 @@ void destroyPCBNode(struct PCBNode* pcbNode){
 typedef struct Queue {
     struct PCBNode* head;
     struct PCBNode* tail;
-    int size;
-    
-    void (*enqueue) (struct PCBNode*, struct Queue*);
-    struct PCBNode (*dequeue) (struct Queue*);
-    struct PCBNode (*peek) (struct Queue*);
-    
+    int size;    
 } Queue;
 
 //method definitions
@@ -125,14 +120,15 @@ struct PCBNode* dequeue (Queue* queue){
         return NULL;
     }
     //get the head of the queue
-    PCBNode* head = queue->head;
+    PCBNode* ret = queue->head;
     
     //set the new head and decrement size
-    queue->head = head->next;
+    queue->head = queue->head->next;
+    ret->next = NULL;
     queue->size--;
     
     //return the head
-    return head;
+    return ret;
 }
 
 
@@ -150,29 +146,22 @@ struct Queue createQueue(){
 //increment the count
 //compare the total quanta
 struct PCBNode* dequeueAndCheckTermination(Queue *queue){
-    if (queue->size > 0){
-        PCBNode* node = dequeue(queue);
-        node->state = running;
-        node->count++;
-        printf("Node %d Count: %d of %d\n", node->id, node->count, node->quanta);
-        if(node->count >= node->quanta){
-            node->state = halted;
-            printf("Process %d TERMINATED, Process completed %d quanta of %d total quanta\n", node->id, node->count, node->quanta);
-            destroyPCBNode(node);
-            return (PCBNode*)0;
-        }
-        if(node->id == 0){
-        	return(PCBNode*)0;
-        }
-        return node;
-    }
-    return (PCBNode*)0;
+	PCBNode* node = dequeue(queue);
+	node->state = running;
+	node->count++;
+	if(node->count == node->quanta){
+		node->state = halted;
+		printf("Process %d TERMINATED, Process completed %d quanta of %d total quanta\n", node->id, node->count, node->quanta);
+		destroyPCBNode(node);
+		return(PCBNode*)0;
+	}
+	return node;
 }
 
 //returns 1 if there is an interrupt in the node
-int checkIOInterrupt(PCBNode* node, int array[4]){
+int checkIOInterrupt(PCBNode* node, int array[NODE_ARRAY_SIZE]){
 	int i;
-	for(i=0; i < 4; i++){
+	for(i=0; i < NODE_ARRAY_SIZE; i++){
 		if(node->count == array[i]){
 			//printf("Node %d interrupted by IO request at quanta %d\n", node->id, node->count);
 			return 1;
