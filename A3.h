@@ -87,7 +87,8 @@ void destroyPCBNode(struct PCBNode* pcbNode){
 typedef struct Queue {
     struct PCBNode* head;
     struct PCBNode* tail;
-    int size;    
+    int size; 
+    int mutex;   
 } Queue;
 
 //method definitions
@@ -135,6 +136,7 @@ struct PCBNode* dequeue (Queue* queue){
 //create a queue
 struct Queue createQueue(){
     Queue queue;
+    queue.mutex = 0;
     queue.size = 0;
     queue.head = NULL;
     queue.tail = NULL;
@@ -162,7 +164,7 @@ struct PCBNode* dequeueAndCheckTermination(Queue *queue){
 int checkIOInterrupt(PCBNode* node, int array[NODE_ARRAY_SIZE]){
 	int i;
 	for(i=0; i < NODE_ARRAY_SIZE; i++){
-		if(node->count == array[i]){
+		if(node->count % array[i] == 0){
 			//printf("Node %d interrupted by IO request at quanta %d\n", node->id, node->count);
 			return 1;
 		}
@@ -170,12 +172,25 @@ int checkIOInterrupt(PCBNode* node, int array[NODE_ARRAY_SIZE]){
 	return 0;
 }
 
-//randomly dequeue something
+//randomly dequeue something, 1/4 chance at success
 void randomlyDequeue(Queue* intQ, Queue* readyQ){
-	int r = rand() % 2;
+	int r = rand() % 4;
 	if (r == 0) {
 		if (intQ->size > 0){
 			enqueue((dequeue(intQ)), readyQ);
 		}
 	}
+}
+
+//randomly complete a Kernel request 1/4 chance at success
+//returns 1 if an element is moved to the ready queue, else returns 0
+int randomlyDequeueKernel(Queue* kernelQ, Queue* readyQ){
+	int r = rand() % 4;
+	if (r == 0){
+		if(kernelQ->size > 0){
+			enqueue((dequeue(kernelQ)), readyQ);
+			return 1;
+		}
+	}
+	return 0;
 }
