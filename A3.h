@@ -1,3 +1,8 @@
+//TCSS 422 Operating Systems A3
+
+//Matthew Seto & Arsh Singh
+
+
 #include <stdio.h>
 #include <stdlib.h>
 #include <time.h>
